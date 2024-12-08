@@ -1,0 +1,187 @@
+<odoo>
+    <data>
+        <!-- Vista de lista de estudiantes -->
+        <record model="ir.ui.view" id="school_student_list">
+            <field name="name">school student list</field>
+            <field name="model">school.student</field>
+            <field name="arch" type="xml">
+                <tree decoration-info="birth_year &gt; 2000">
+                    <field name="name"/>
+                    <field name="birth_year" decoration-warning="birth_year &lt; 1999"/>
+                    <field name="password"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Vista de lista de profesores -->
+        <record model="ir.ui.view" id="school_teacher_list">
+            <field name="name">school teacher list</field>
+            <field name="model">school.teacher</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="topic"/>
+                    <field name="phone"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Vista formulario de estudiantes -->
+        <record model="ir.ui.view" id="school_student_form">
+            <field name="name">school student form</field>
+            <field name="model">school.student</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="regenerate_password" type="object" icon="fa-pencil-square-o" string="Regenerate Password"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <field name="photo" widget="image"  width="200" height="200"/>
+                        <group>
+                            <group>
+                                <separator string="Personal Data"/>
+
+                                <field name="name"/>
+                                <field name="birth_year"/>
+                                <field name="password"/>
+                                <field name="dni"/>
+                            </group>
+                            <group>
+                                <separator string="Enrollment Data"/>
+                                <field name="description"/>
+                                <field name="enrollment_date"/>
+                                <field name="last_login"/>
+                                <field name="classroom_last_year"/>
+                                <field name="is_student"/>
+                                <field name="level"/>
+                                <field name="classroom"
+                                       />
+                                <field name="teachers"/>
+                            </group>
+
+                            <notebook>
+                                <page string="Teachers">
+                                    <field name="teachers" widget="many2many_tags"/>
+                                </page>
+                            </notebook>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Vista búsqueda de estudiantes -->
+        <record model="ir.ui.view" id="school_student_search">
+            <field name="name">school student search</field>
+            <field name="model">school.student</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="birth_year" string="Min Year" filter_domain="[('birth_year', '&gt;=', self)]"/>
+                    <field name="dni"/>
+                    <filter name="old" string="Old Student" domain="[('birth_year', '&lt;=', 2008)]"/>
+                    <filter name="group_by_classroom" string="Group by Classroom" context="{'group_by':'classroom'}"/>
+                </search>
+            </field>
+        </record>
+
+        <!-- Vista formulario de creación rápida -->
+        <record model="ir.ui.view" id="school_quick_create_student_form">
+            <field name="name">school.student form quickcreate</field>
+            <field name="model">school.student</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="name"/>
+                        <field name="birth_year"/>
+                        <field name="level"/> <!-- Agrega aquí el campo 'level' -->
+                        <field name="classroom" domain="[('level', '=', level)]"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <!-- Vista kanban de estudiantes -->
+        <record model="ir.ui.view" id="school_student_kanban">
+            <field name="name">school.student kanban</field>
+            <field name="model">school.student</field>
+            <field name="arch" type="xml">
+              <kanban default_group_by="classroom" on_create="quick_create" quick_create_view="school.quick_create_student_form">
+    <field name="id"/>
+    <field name="classroom"/>
+    <field name="name"/>
+    <templates>
+        <t t-name="kanban-box">
+            <!-- Usamos decoration-color para establecer el color según la clase -->
+            <div t-attf-class="oe_kanban_color_{{kanban_getcolor(record.classroom.raw_value)}}">
+                <a type="open">
+                    <img class="oe_kanban_image"
+                         t-att-alt="record.name.value"
+                         t-att-src="kanban_image('school.student', 'photo', record.id.value)"
+                         width="150"
+                         height="150"/>
+                </a>
+                <div class="oe_kanban_content">
+                    <h4>
+                        <a type="edit">
+                            <field name="name"/>
+                        </a>
+                    </h4>
+                    <ul>
+                        <li>Classroom: <field name="classroom"/></li>
+                    </ul>
+                </div>
+            </div>
+        </t>
+    </templates>
+</kanban>
+
+            </field>
+        </record>
+
+        <!-- Vista calendario -->
+        <record model="ir.ui.view" id="school_seminar_calendar">
+            <field name="name">seminar calendar</field>
+            <field name="model">school.seminar</field>
+            <field name="arch" type="xml">
+                <calendar string="Seminar Calendar" date_start="date" date_stop="finish" color="classroom">
+                    <field name="name"/>
+                </calendar>
+            </field>
+        </record>
+
+        <!-- Acciones -->
+        <record model="ir.actions.act_window" id="school_action_student_window">
+            <field name="name">school student window</field>
+            <field name="res_model">school.student</field>
+            <field name="view_mode">tree,form,kanban</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="school_action_classroom_window">
+            <field name="name">school classroom window</field>
+            <field name="res_model">school.classroom</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="school_action_teacher_window">
+            <field name="name">school teacher window</field>
+            <field name="res_model">school.teacher</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="school_action_calendar_window">
+            <field name="name">school calendar window</field>
+            <field name="res_model">school.seminar</field>
+            <field name="view_mode">tree,form,calendar</field>
+        </record>
+
+        <!-- Menú -->
+        <menuitem name="School" id="school_menu_root"/>
+        <menuitem name="Management" id="school_menu_1" parent="school_menu_root"/>
+        <menuitem name="Students" id="school_menu_student_list" parent="school_menu_1" action="school_action_student_window"/>
+        <menuitem name="Classroom" id="school_menu_classroom_list" parent="school_menu_1" action="school_action_classroom_window"/>
+        <menuitem name="Teachers" id="school_menu_teacher_list" parent="school_menu_1" action="school_action_teacher_window"/>
+        <menuitem name="Calendar" id="school_menu_calendar_list" parent="school_menu_1" action="school_action_calendar_window"/>
+    </data>
+</odoo>
